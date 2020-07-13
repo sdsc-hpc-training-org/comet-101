@@ -8,6 +8,10 @@ The link to the presentation can be found here:
 
 https://education.sdsc.edu/training/interactive/202004_intro_to_comet/index.php
 
+## Hands-on Self-guided Tutorial:
+
+https://github.com/sdsc-hpc-training-org/comet-101/blob/master/running_jobs_on_comet.md
+
 ## Link to GitHub Repo
 https://github.com/sdsc-hpc-training-org/webinars/tree/master/202004_comet_101
 
