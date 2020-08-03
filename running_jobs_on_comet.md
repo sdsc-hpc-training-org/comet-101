@@ -14,24 +14,24 @@ The commands below can be cut & pasted into the terminal window, which is connec
 * The `hostname` for Comet is `comet.sdsc.edu`
 * The operating system for Comet was changed to CentOS in December, 2019. As a result, you will need to recompile all code, some modules and libraries are no longer needed, and the locations of some libraries and applications have changed. For details, see the transition guide here:
    * https://www.sdsc.edu/services/hpc/comet_upgrade.html
+* Our next HPC system, [E X P A N S E](https://expanse.sdsc.edu), will be coming online for early users in September. Keep an eye on the E X P A N S E pages for training information and other updates
 
 <em>If you have any difficulties completing these tasks, please contact SDSC Consulting group at <consult@sdsc.edu>.</em>
 <hr>
 
 <a name="top">Contents:
+* [Comet Overview](#overview)
+    * [Comet Architecture](#network-arch)
+    * [Comet File Systems](#file-systems)
+
 * [Getting Started - Comet System Environment](#sys-env)
     * [Comet Accounts](#comet-accounts)
     * [Logging Onto Comet](#comet-logon)
     * [Obtaining Example Code](#example-code)
 
-* [Comet Overview](#overview)
-    * [Comet Architecture](#network-arch)
-    * [Comet File Systems](#file-systems)
-
 * [Modules: Managing User Environments](#modules)
     * [Common module commands](#module-commands)
     * [Load and Check Modules and Environment](#load-and-check-module-env)
-    * [Using Scripts to Load Module Environments](#module-load-scripts)
     * [Module Error: command not found](#module-error)
 
 * [Compiling & Linking](#compilers)
@@ -40,10 +40,13 @@ The commands below can be cut & pasted into the terminal window, which is connec
     * [Using the PGI Compilers](#compilers-pgi)
     * [Using the GNU Compilers](#compilers-gnu)
 
-* [Running Parallel Jobs on Comet](#running-jobs)
+* [Running Jobs on Comet](#running-jobs)
+    * [The SLURM Resource Manager](#running-jobs-slurm)
+      * [Common Slurm Commands](#running-jobs-slurm-commands)
+      * [Slurm Partitions](#running-jobs-slurm-partitions)
+    * [Interactive Jobs using SLURM](#running-jobs-slurm-interactive)
+    * [Batch Jobs using SLURM](#running-jobs-slurm-batch-submit)
     * [Command Line Jobs](#running-jobs-cmdline)
-    * [Batch Jobs using SLURM](#running-jobs-slurm)
-    * [Slurm Commands](#running-jobs-slurm-commands)
 
 * [Hands-on Examples](#hands-on)
 * [Compiling and Running GPU/CUDA Jobs](#comp-and-run-cuda-jobs)
@@ -62,118 +65,21 @@ The commands below can be cut & pasted into the terminal window, which is connec
 
 * [Compiling and Running CPU Jobs](#comp-and-run-cpu-jobs)
     * [Hello World (MPI)](#hello-world-mpi)
+        * [Hello World (MPI): Source Code](#hello-world-mpi-source)
         * [Hello World (MPI): Compiling](#hello-world-mpi-compile)
+        * [Hello World (MPI): Interactive Jobs](#hello-world-mpi-interactive)
         * [Hello World (MPI): Batch Script Submission](#hello-world-mpi-batch-submit)
         * [Hello World (MPI): Batch Script Output](#hello-world-mpi-batch-output)
     * [Hello World (OpenMP)](#hello-world-omp)
+        * [Hello World (OpenMP): Source Code](#hello-world-omp-source)
         * [Hello World (OpenMP): Compiling](#hello-world-omp-compile)
-        * [Hello World (OpenMP): Interactive jobs](#hello-world-omp-interactive)
         * [Hello World (OpenMP): Batch Script Submission](#hello-world-omp-batch-submit)
         * [Hello World (OpenMP): Batch Script Output](#hello-world-omp-batch-output)
-    * [Running Hybrid (MPI + OpenMP) Jobs](#hybrid-mpi-omp)
+    * [Compiling and Running Hybrid (MPI + OpenMP) Jobs](#hybrid-mpi-omp)
+        * [Hybrid (MPI + OpenMP): Source Code](#hybrid-mpi-omp-source)
         * [Hybrid (MPI + OpenMP): Compiling](#hybrid-mpi-omp-compile)
         * [Hybrid (MPI + OpenMP): Batch Script Submission](#hybrid-mpi-omp-batch-submit)
-        * [Hybrid (MPI + OpenMP): Batch Script Output](#hybrid-mpi-omp-output)
-
-[Back to Top](#top)
-<hr>
-
-## <a name="sys-env"></a>Getting Started on Comet
-
-### <a name="comet-accounts"></a>Comet Accounts
-You must have a comet account in order to access the system.
-* Obtain a trial account here:  http://www.sdsc.edu/support/user_guides/comet.html#trial_accounts
-* You can use your XSEDE account.
-
-### <a name="comet-logon"></a>Logging Onto Comet
-Details about how to access Comet under different circumstances are described in the Comet User Guide:
- http://www.sdsc.edu/support/user_guides/comet.html#access
-
- </a><img src="images/comet-logon.png" alt="Comet Logon" width="500px" />
-
-```
-[mthomas@gidget:~] ssh -Y comet.sdsc.edu
-Last login: Wed Apr 15 23:56:08 2020 from 76.176.117.51
-Rocks 7.0 (Manzanita)
-Profile built 13:03 03-Dec-2019
-
-Kickstarted 14:18 03-Dec-2019
-
-                      WELCOME TO
-      __________________  __  _______________
-        -----/ ____/ __ \/  |/  / ____/_  __/
-          --/ /   / / / / /|_/ / __/   / /
-           / /___/ /_/ / /  / / /___  / /
-           \____/\____/_/  /_/_____/ /_/
-
-###############################################################################
-NOTICE:
-The Comet login nodes are not to be used for running processing tasks.
-This includes running Jupyter notebooks and the like.  All processing
-jobs should be submitted as jobs to the batch scheduler.  If you don’t
-know how to do that see the Comet user guide
-https://www.sdsc.edu/support/user_guides/comet.html#running.
-Any tasks found running on the login nodes in violation of this policy
- may be terminated immediately and the responsible user locked out of
-the system until they contact user services.
-###############################################################################
-```
-
-[Back to Top](#top)
-<hr>
-
-### <a name="example-code"></a>Obtaining Example Code
-* Create a test directory hold the comet example files:
-```
-[comet-ln2 ~]$ mkdir comet-examples
-[comet-ln2 ~]$ ls -al
-total 166
-drwxr-x---   8 user user300    24 Jul 17 20:20 .
-drwxr-xr-x 139 root    root       0 Jul 17 20:17 ..
--rw-r--r--   1 user use300  2487 Jun 23  2017 .alias
--rw-------   1 user use300 14247 Jul 17 12:11 .bash_history
--rw-r--r--   1 user use300    18 Jun 19  2017 .bash_logout
--rw-r--r--   1 user use300   176 Jun 19  2017 .bash_profile
--rw-r--r--   1 user use300   159 Jul 17 18:24 .bashrc
-drwxr-xr-x   2 user use300     2 Jul 17 20:20 comet-examples
-[snip extra lines]
-[comet-ln2 ~]$ cd comet-examples/
-[comet-ln2 comet-examples]$ pwd
-/home/user/comet-examples
-[comet-ln2 comet-examples]$
-```
-* Copy the `comet101 directory` from the /examples directory to your 'comet-examples' directory, which is located in your home (`/home/username`) directory. Note: you should have completed the creation of this directory as part of the *Getting Started* and *Basic Skills* preparation work:
-https://github.com/sdsc/sdsc-summer-institute-2018/tree/master/0_preparation
-```
-[mthomas@comet-ln3 ~]$ ls -al /share/apps/examples/comet101/
-[mthomas@comet-ln3:~/comet101] ll /share/apps/examples/hpc-training/comet101/
-total 20
-drwxr-sr-x 5 mthomas  use300 4096 Apr 16 03:31 .
-drwxrwsr-x 4 mahidhar use300 4096 Apr 15 23:37 ..
-drwxr-sr-x 5 mthomas  use300 4096 Apr 16 03:30 CUDA
-drwxr-sr-x 4 mthomas  use300 4096 Apr 16 03:30 MPI
-drwxr-sr-x 2 mthomas  use300 4096 Apr 16 03:31 OPENMP
-```
-Copy the 'comet101' directory into your `comet-examples` directory:
-```
-[mthomas@comet-ln3 ~]$
-[mthomas@comet-ln3 ~]$ cp -r /share/apps/examples/comet101/ comet-examples/
-[mthomas@comet-ln3 ~]$ ls -al comet-examples/
-total 105
-drwxr-xr-x  5 username use300   6 Aug  5 19:02 .
-drwxr-x--- 10 username use300  27 Aug  5 17:59 ..
-drwxr-xr-x 16 username use300  16 Aug  5 19:02 comet101
-[mthomas@comet-ln3 ~]$ cd comet-examples/comet101/
-[mthomas@comet-ln3 comet101]$ ls -al
-total 132
-drwxr-xr-x  6 mthomas use300  6 Apr 16 01:47 .
-drwxr-x--- 52 mthomas use300 79 Apr 16 02:27 ..
-drwxr-xr-x  5 mthomas use300  5 Apr 16 02:37 CUDA
-drwxr-xr-x  2 mthomas use300  3 Apr 15 20:16 jupyter_notebooks
-drwxr-xr-x  4 mthomas use300  7 Apr 16 01:11 MPI
-drwxr-xr-x  2 mthomas use300  9 Apr 16 00:49 OPENMP
-```
-Most examples will contain source code, along with a batch script example so you can run the example, and compilation examples (e.g. see the MKL example).
+        * [Hybrid (MPI + OpenMP): Batch Script Output](#hybrid-mpi-omp-batch-output)
 
 [Back to Top](#top)
 <hr>
@@ -186,8 +92,11 @@ Most examples will contain source code, along with a batch script example so you
 * Also supports science gateways.
 
 <img src="images/comet-rack.png" alt="Comet Rack View" width="500px" />
-* ~67 TF supercomputer in a rack
-* 27 single-rack supercomputers
+* 2.76 Pflop/s peak
+* 48,784 CPU cores
+* 288 NVIDIA GPUs
+* 247 TB total memory
+* 634 TB total flash memory
 
 
 <img src="images/comet-characteristics.png" alt="Comet System Characteristics" width="500px" />
@@ -219,6 +128,113 @@ Most examples will contain source code, along with a batch script example so you
 [Back to Top](#top)
 <hr>
 
+
+## <a name="sys-env"></a>Getting Started on Comet
+
+### <a name="comet-accounts"></a>Comet Accounts
+You must have a comet account in order to access the system.
+* Obtain a trial account here:  http://www.sdsc.edu/support/user_guides/comet.html#trial_accounts
+* You can use your XSEDE account.
+
+### <a name="comet-logon"></a>Logging Onto Comet
+Details about how to access Comet under different circumstances are described in the Comet User Guide:
+ http://www.sdsc.edu/support/user_guides/comet.html#access
+
+For instructions on how to use SSH, see [here](https://github.com/sdsc/sdsc-summer-institute-2020/tree/master/0_preparation/connecting-to-hpc-systems)
+```
+[mthomas@gidget:~] ssh -Y comet.sdsc.edu
+Password:
+Last login: Fri Jul 31 14:20:40 2020 from 76.176.117.51
+Rocks 7.0 (Manzanita)
+Profile built 12:32 03-Dec-2019
+
+Kickstarted 13:47 03-Dec-2019
+
+                      WELCOME TO
+      __________________  __  _______________
+        -----/ ____/ __ \/  |/  / ____/_  __/
+          --/ /   / / / / /|_/ / __/   / /
+           / /___/ /_/ / /  / / /___  / /
+           \____/\____/_/  /_/_____/ /_/
+###############################################################################
+NOTICE:
+The Comet login nodes are not to be used for running processing tasks.
+This includes running Jupyter notebooks and the like.  All processing
+jobs should be submitted as jobs to the batch scheduler.  If you don’t
+know how to do that see the Comet user guide
+https://www.sdsc.edu/support/user_guides/comet.html#running.
+Any tasks found running on the login nodes in violation of this policy
+ may be terminated immediately and the responsible user locked out of
+the system until they contact user services.
+###############################################################################
+(base) [mthomas@comet-ln2:~]
+
+```
+
+[Back to Top](#top)
+<hr>
+
+### <a name="example-code"></a>Obtaining Example Code
+* Create a test directory hold the comet example files:
+```
+[comet-ln2 ~]$ mkdir comet-examples
+[comet-ln2 ~]$ ls -al
+total 166
+drwxr-x---   8 user user300    24 Jul 17 20:20 .
+drwxr-xr-x 139 root    root       0 Jul 17 20:17 ..
+-rw-r--r--   1 user use300  2487 Jun 23  2017 .alias
+-rw-------   1 user use300 14247 Jul 17 12:11 .bash_history
+-rw-r--r--   1 user use300    18 Jun 19  2017 .bash_logout
+-rw-r--r--   1 user use300   176 Jun 19  2017 .bash_profile
+-rw-r--r--   1 user use300   159 Jul 17 18:24 .bashrc
+drwxr-xr-x   2 user use300     2 Jul 17 20:20 comet-examples
+[snip extra lines]
+[comet-ln2 ~]$ cd comet-examples/
+[comet-ln2 comet-examples]$ pwd
+/home/user/comet-examples
+[comet-ln2 comet-examples]$
+```
+* Copy the `/share/apps/examples/comet101/` directory to your local (`/home/username/comet-examples`) directory. Note: you can learn to create and modify directories as part of the *Getting Started* and *Basic Skills* preparation work:
+https://github.com/sdsc/sdsc-summer-institute-2020/tree/master/0_preparation
+```
+[mthomas@comet-ln3 ~]$ ls -al /share/apps/examples/hpc-training/comet-examples/
+total 20
+(base) [mthomas@comet-ln2:~/comet101] ll /share/apps/examples/hpc-training/comet101/
+total 32
+drwxr-sr-x 8 mthomas  use300 4096 Apr 16 10:39 .
+drwxrwsr-x 4 mahidhar use300 4096 Apr 15 23:37 ..
+drwxr-sr-x 5 mthomas  use300 4096 Apr 16 03:30 CUDA
+drwxr-sr-x 2 mthomas  use300 4096 Apr 16 10:39 HYBRID
+drwxr-sr-x 2 mthomas  use300 4096 Apr 16 10:39 jupyter_notebooks
+drwxr-sr-x 2 mthomas  use300 4096 Apr 16 16:46 MKL
+drwxr-sr-x 4 mthomas  use300 4096 Apr 16 03:30 MPI
+drwxr-sr-x 2 mthomas  use300 4096 Apr 16 03:31 OPENMP
+```
+Copy the 'comet101' directory into your `comet-examples` directory:
+```
+[mthomas@comet-ln3 ~]$
+[mthomas@comet-ln3 ~]$ cp -r /share/apps/examples/comet101/ comet-examples/
+[mthomas@comet-ln3 ~]$ ls -al comet-examples/
+total 105
+drwxr-xr-x  5 username use300   6 Aug  5 19:02 .
+drwxr-x--- 10 username use300  27 Aug  5 17:59 ..
+drwxr-xr-x 16 username use300  16 Aug  5 19:02 comet101
+[mthomas@comet-ln3 comet-examples]$ ls -al
+total 132
+total 170
+drwxr-xr-x  8 mthomas use300  8 Aug  3 01:19 .
+drwxr-x--- 64 mthomas use300 98 Aug  3 01:19 ..
+drwxr-xr-x  5 mthomas use300  5 Aug  3 01:19 CUDA
+drwxr-xr-x  2 mthomas use300  6 Aug  3 01:19 HYBRID
+drwxr-xr-x  2 mthomas use300  3 Aug  3 01:19 jupyter_notebooks
+drwxr-xr-x  2 mthomas use300  6 Aug  3 01:19 MKL
+drwxr-xr-x  4 mthomas use300  9 Aug  3 01:19 MPI
+drwxr-xr-x  2 mthomas use300  9 Aug  3 01:19 OPENMP
+```
+Most examples will contain source code, along with a batch script example so you can run the example, and compilation examples (e.g. see the MKL example).
+
+[Back to Top](#top)
+<hr>
 
 
 ## <a name="modules"></a>Modules: Customizing Your User Environment
@@ -353,7 +369,7 @@ http://www.sdsc.edu/support/user_guides/comet.html#compiling
 
 Comet compute nodes support several parallel programming models:
 * __MPI__: Default: Intel
-   * Default Intel Compiler: intel/2018.1.163; Other versions available. 
+   * Default Intel Compiler: intel/2018.1.163; Other versions available.
    * Other options: openmpi_ib/1.8.4 (and 1.10.2), Intel MPI, mvapich2_ib/2.1
    * mvapich2_gdr: GPU direct enabled version
 * __OpenMP__: All compilers (GNU, Intel, PGI) have OpenMP flags.
@@ -462,41 +478,94 @@ For more information on the GNU compilers: man [gfortran | gcc | g++]
 [Back to Top](#top)
 <hr>
 
-## <a name="running-jobs"></a>Running Jobs on Comet
 
-### <a name="running-jobs-cmdline"></a>Command Line Jobs
-<em>Do not run on the login nodes - even for simple tests</em>.
-These nodes are meant for compilation, file editing, simple data analysis, and other tasks that use minimal compute resources. Even if you could run a simple test on the command line on the login node, full tests should not be run on the login node because the performance will be adversely impacted by all the other tasks and login activities of the other users who are logged onto the same node. For example, at the moment that this note was writeen,  a `gzip` process was consuming 98% of the CPU time:
-```
-[mthomas@comet-ln3 OPENMP]$ top
-...
-  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                      
-19937 XXXXX     20   0  4304  680  300 R 98.2  0.0   0:19.45 gzip
-```
+## Running Jobs on Comet <a name="running-jobs"></a>
+Comet manages computational work via the Simple Linux Utility for Resource Management (SLURM) batch environment. Comet places limits on the number of jobs queued and running on a per group (allocation) and partition basis. Submitting a large number of jobs (especially very short ones) can impact the overall  scheduler response for all users. If you are anticipating submitting a lot of jobs,  contact the SDSC consulting staff before you submit them. We can work to check if there are bundling options that make your workflow more efficient and reduce the impact on the scheduler
 
-### <a name="running-jobs-slurm"></a>Running Jobs using SLURM
+For more details, see the section on Running job in the Comet User Guide:
+http://www.sdsc.edu/support/user_guides/comet.html#running
+
+
+### The Simple  Linux Utility for Resource Management  (SLURM) <a name="running-jobs-slurm"></a>
+
+<img src="images/slurm.png" alt="Simple Linux Utility for Resource Management" width="500px" />
+
+* “Glue” for parallel computer to schedule and execute jobs
+* Role: Allocate resources within a cluster
+  * Nodes (unique IP address)
+  * Interconnect/switches
+  * Generic resources (e.g. GPUs)
+  * Launch and otherwise manage jobs
+
+* Functionality:
+  * Prioritize queue(s) of jobs;
+  * decide when and where to start jobs;
+  * terminate job when done;
+  * Appropriate resources;
+  * Manage accounts for jobs
 
 * All jobs must be run via the Slurm scheduling infrastructure. There are two types of jobs:
-    * Interactive Jobs: Use the `srun` command:
-        ```
-        srun --pty --nodes=1 --ntasks-per-node=24 -p debug -t 00:30:00 --wait 0 /bin/bash
-        ```
-    * Batch Jobs: Submit batch scripts from the login nodes. You can set environment variables in the shell or in the batch script, including:
-        * Partition (also called the qeueing system)
-        * Time limit for a job (maximum of 48 hours; longer on request)
-        * Number of nodes, tasks per node
-        * Memory requirements (if any)
-        * Job name, output file location
-        * Email info, configuration
+   * [Interactive Jobs](#running-jobs-slurm-interactive)
+   * [Batch Jobs](#running-jobs-slurm-batch-submit)
 
 [Back to Top](#top)
 <hr>
 
-### <a name="slurm-batch-jobs"></a>Batch Jobs using SLURM:
-Comet uses the Simple Linux Utility for Resource Management (SLURM) batch environment. For more details, see the section on Running job in the Comet User Guide:
-http://www.sdsc.edu/support/user_guides/comet.html#running
+### Interactive Jobs: <a name="running-jobs-slurm-interactive">
+Interactive HPC systems allow *real-time* user inputs in order to facilitate code development, real-time data exploration, and visualizations. An interactive job (also referred as interactive session) will provide you with a shell on a compute node in which you can launch your jobs. On Comet, use the ```srun``` command:
+```
+srun --pty --nodes=1 --ntasks-per-node=24 -p debug -t 00:30:00 --wait 0 /bin/bash
+```
 
-### Slurm Partitions
+For more information, see the interactive computing tutorial [here](https://github.com/sdsc/sdsc-summer-institute-2020/blob/master/0_preparation/interactive_computing/README.md).
+
+### Batch Jobs using SLURM: <a name="running-jobs-slurm-batch"></a>
+When you run in the batch mode, you submit jobs to be run on the compute nodes using the ```sbatch``` command (described below).
+
+Batch scripts are submitted from the login nodes. You can set environment variables in the shell or in the batch script, including:
+* Partition (also called the qeueing system)
+* Time limit for a job (maximum of 48 hours; longer on request)
+* Number of nodes, tasks per node
+* Memory requirements (if any)
+* Job name, output file location
+* Email info, configuration
+
+Below is an example of a basic batch script, which shows key features including
+ naming the job/output file, selecting the SLURM queue partition, defining the
+ number of nodes and ocres, and the length of time that the job will need:
+
+```
+[mthomas@comet-ln3 IBRUN]$ cat hellompi-slurm.sb
+#!/bin/bash
+#SBATCH --job-name="hellompi"
+#SBATCH --output="hellompi.%j.%N.out"
+#SBATCH --partition=compute
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=24
+#SBATCH --export=ALL
+#SBATCH -t 00:30:00
+
+#Define user environment
+source /etc/profile.d/modules.sh
+module purge
+module load intel
+module load mvapich2_ib
+
+#This job runs with 2 nodes, 24 cores per node for a total of 48 cores.
+#ibrun in verbose mode will give binding detail
+
+ibrun -v ../hello_mpi
+```
+
+Note that we have included configuring the user environment by purging and
+then loading the necessary modules. While not required, it is a good habit
+to develop when building batch scripts.
+
+[Back to Top](#top)
+<hr>
+
+### Slurm Partitions <a name="slurm-partitions"></a>
+Comet places limits on the number of jobs queued and running on a per group (allocation) and partition basis. Please note that submitting a large number of jobs (especially very short ones) can impact the overall  scheduler response for all users.
 
 <img src="images/comet-queue-names.png" alt="Comet Queue Names" width="500px" />
 
@@ -507,7 +576,7 @@ Specified using -p option in batch script. For example:
 [Back to Top](#top)
 <hr>
 
-### <a name="slurm-commands"></a>Slurm Commands
+### Slurm Commands: <a name="slurm-commands"></a>
 Here are a few key Slurm commands. For more information, run the `man slurm` or see this page:
 
 * To Submit jobs using the `sbatch` command:
@@ -531,12 +600,29 @@ $ squeue -u $USER
 * To cancel a job, use the `scancel` along with the `JOBID`:
     *   $scancel <jobid>
 
+### Command Line Jobs <a name="running-jobs-cmdline"></a>
+    The login nodes are meant for compilation, file editing, simple data analysis, and other tasks that use minimal compute resources. <em>Do not run parallel or large jobs on the login nodes - even for simple tests</em>. Even if you could run a simple test on the command line on the login node, full tests should not be run on the login node because the performance will be adversely impacted by all the other tasks and login activities of the other users who are logged onto the same node. For example, at the moment that this note was written,  a `gzip` process was consuming 98% of the CPU time:
+    ```
+    [mthomas@comet-ln3 OPENMP]$ top
+    ...
+      PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                      
+    19937 XXXXX     20   0  4304  680  300 R 98.2  0.0   0:19.45 gzip
+    ```
+
+Commands that you type into the terminal and run on the sytem are considered *jobs* and they consume resources.  <em>Computationally intensive jobs should be run only on the compute nodes and not the login nodes</em>.
 
 [Back to Top](#top)
 <hr>
 
 ## <a name="hands-on"></a>Hands-on Examples
-
+* [Compiling and Running GPU/CUDA Jobs](#comp-and-run-cuda-jobs)
+  * [GPU Hello World (GPU) ](#hello-world-gpu)
+  * [GPU Enumeration ](#enum-gpu)
+  * [CUDA Mat-Mult](#mat-mul-gpu)
+* [Compiling and Running CPU Jobs](#comp-and-run-cpu-jobs)
+  * [Hello World (MPI)](#hello-world-mpi)
+  * [Hello World (OpenMPI)](#hello-world-omp)
+  * [Compiling and Running Hybrid (MPI + OpenMP) Jobs](#hybrid-mpi-omp)
 
 ## <a name="comp-and-run-cuda-jobs"></a>Compiling and Running GPU/CUDA Jobs
 <b>Sections:</b>
@@ -632,6 +718,11 @@ drwxr-xr-x 4 mthomas use300  11 Apr 16 01:57 ..
 #SBATCH --gres=gpu:2
 #SBATCH -t 01:00:00
 
+# Define the user environment
+source /etc/profile.d/modules.sh
+module purge
+module load intel
+module load mvapich2_ib
 #Load the cuda module
 module load cuda
 
@@ -793,6 +884,11 @@ Script is asking for 1 GPU.
 #SBATCH --gres=gpu:1         # define type of GPU
 #SBATCH -t 00:05:00
 
+# Define the user environment
+source /etc/profile.d/modules.sh
+module purge
+module load intel
+module load mvapich2_ib
 #Load the cuda module
 module load cuda
 
@@ -861,11 +957,16 @@ Max grid dimensions: (2147483647, 65535, 65535)
   8 #SBATCH --gres=gpu:2         # first available
   9 #SBATCH -t 00:05:00
  10
- 11 #Load the cuda module
- 12 module load cuda
- 13
- 14 #Run the job
- 15 ./gpu_enum
+ 11 # Define the user environment
+ 12 source /etc/profile.d/modules.sh
+ 13 module purge
+ 14 module load intel
+ 15 module load mvapich2_ib
+ 16 #Load the cuda module
+ 17 module load cuda
+ 18
+ 19 #Run the job
+ 20 ./gpu_enum
 ```
 
 The output will show information for two devices:
@@ -990,6 +1091,11 @@ drwxr-xr-x 16 user user300     16 Aug  5 19:02 ..
 #SBATCH --gres=gpu:1
 #SBATCH -t 00:10:00
 
+# Define the user environment
+source /etc/profile.d/modules.sh
+module purge
+module load intel
+module load mvapich2_ib
 #Load the cuda module
 module load cuda
 
@@ -1035,7 +1141,7 @@ vary when GPU Boost is enabled.
 <hr>
 
 
-## <a name="comp-and-run-cpu-jobs"></a> Compiling and Running CPU Jobs
+## Compiling and Running CPU Jobs: <a name="comp-and-run-cpu-jobs"></a>
 <b>Sections:</b>
 * [Hello World (MPI)](#hello-world-mpi)
 * [Hello World (OpenMP)](#hello-world-omp)
@@ -1044,11 +1150,14 @@ vary when GPU Boost is enabled.
 
 ### <a name="hello-world-mpi"></a>Hello World (MPI)
 <b>Subsections:</b>
-* [CPU Hello World: Compiling](#hello-world-mpi-compile)
-* [CPU Hello World: Batch Script Submission](#hello-world-mpi-batch-submit)
-* [CPU Hello World: Batch Job Output](#hello-world-mpi-batch-output)
+* [Hello World (MPI): Source Code](#hello-world-mpi-source)
+* [Hello World (MPI): Compiling](#hello-world-mpi-compile)
+* [Hello World (MPI): Interactive Jobs](#hello-world-mpi-interactive)
+* [Hello World (MPI): Batch Script Submission](#hello-world-mpi-batch-submit)
+* [Hello World (MPI): Batch Script Output](#hello-world-mpi-batch-output)
 
 
+#### CPU Hello World: Source code: <#hello-world-mpi-source>
 Change to the MPI examples directory (assuming you already copied the ):
 ```
 [mthomas@comet-ln3 comet101]$ cd MPI
@@ -1117,7 +1226,7 @@ Currently Loaded Modulefiles:
 [Back to Top](#top)
 <hr>
 
-#### <a name="hello-world-mpi-compile"></a>Hello World (MPI): Compiling
+#### Hello World (MPI): Compiling: <a name="hello-world-mpi-compile"></a>
 
 * Compile the MPI hello world code.
 * For this, we use the command `mpif90`, which is loaded into your environment when you loaded the intel module above.
@@ -1152,7 +1261,7 @@ drwxr-xr-x 2 mthomas use300      3 Apr 16 00:57 MPIRUN_RSH
 [Back to Top](#top)
 <hr>
 
-#### <a name="hello-world-mpi-interactive"></a>Hello World (MPI): Interactive Jobs
+#### Hello World (MPI): Interactive Jobs: <a name="hello-world-mpi-interactive"></a>
 
 * To run MPI (or other executables) from the command line, you need to use the "Interactive" nodes.
 * To launch the nodes (to get allocated a set of nodes), use the `srun` command. This example will request one node, all 24 cores, in the debug partition for 30 minutes:
@@ -1179,13 +1288,13 @@ comet-14-01.sdsc.edu
 [mthomas@comet-14-01 MPI]$
 ```
 
-When you done testing code, exit the Interactive session.
+When you are done testing code, exit the Interactive session.
 
 [Back to CPU Jobs](#comp-and-run-cpu-jobs) <br>
 [Back to Top](#top)
 <hr>
 
-#### <a name="hello-world-mpi-batch-submit"></a>Hello World (MPI): Batch Script Submission
+#### Hello World (MPI): Batch Script Submission:  <a name="hello-world-mpi-batch-submit"></a>
 To submit jobs to the Slurm queuing system, you need to create a slurm batch job script and
 submit it to the queuing system.
 
@@ -1201,6 +1310,12 @@ submit it to the queuing system.
 #SBATCH --ntasks-per-node=24
 #SBATCH --export=ALL
 #SBATCH -t 00:30:00
+
+# load the user environment
+source /etc/profile.d/modules.sh
+module purge
+module load intel
+module load mvapich2_ib
 
 #This job runs with 2 nodes, 24 cores per node for a total of 48 cores.
 #ibrun in verbose mode will give binding detail
@@ -1222,7 +1337,7 @@ sbatch --res=SI2018DAY1 hellompi-slurm.sb
 [Back to Top](#top)
 <hr>
 
-#### <a name="hello-world-mpi-batch-output"></a>Hello World (MPI): Batch Script Output
+#### Hello World (MPI): Batch Script Output: <a name="hello-world-mpi-batch-output"></a>
 
 * Check job status using the `squeue` command.
 ```
@@ -1328,11 +1443,15 @@ IBRUN: Job ended with value 0
 [Back to Top](#top)
 <hr>
 
-### <a name="hello-world-omp"></a>Hello World (OpenMP)
+### Hello World (OpenMP): <a name="hello-world-omp"></a>
 <b>Subsections:</b>
+* [Hello World (OpenMP): Source Code](#hello-world-omp-source)
 * [Hello World (OpenMP): Compiling](#hello-world-omp-compile)
 * [Hello World (OpenMP): Batch Script Submission](#hello-world-omp-batch-submit)
-* [Hello World (OpenMP): Batch Job Output](#hello-world-omp-batch-output)
+* [Hello World (OpenMP): Batch Script Output](#hello-world-omp-batch-output)
+
+
+#### Hello World (OpenMP): Source Code <a name="hello-world-omp-source"></a>
 
 Change to the OPENMP examples directory:
 ```
@@ -1363,7 +1482,7 @@ drwxr-xr-x 16 username use300     16 Aug  5 19:02 ..
 [Back to Top](#top)
 <hr>
 
-#### <a name="hello-world-omp-compile"></a>Hello World (OpenMP): Compiling
+#### Hello World (OpenMP): Compiling:  <a name="hello-world-omp-compile"></a>
 
 Note that there is already a compiled version of the `hello_openmp.f90` code. You can save or delete this version.
 
@@ -1438,6 +1557,12 @@ The submit script is openmp-slurm.sb:
 #SBATCH --export=ALL
 #SBATCH -t 01:30:00
 
+# Define the user environment
+source /etc/profile.d/modules.sh
+module purge
+module load intel
+module load mvapich2_ib
+
 #SET the number of openmp threads
 export OMP_NUM_THREADS=24
 
@@ -1458,7 +1583,7 @@ Submitted batch job 32661678
 [Back to Top](#top)
 <hr>
 
-#### <a name="hello-world-omp-batch-output"></a>Hello World (OpenMP): Batch Script Output
+#### Hello World (OpenMP): Batch Script Output:  <a name="hello-world-omp-batch-output"></a>
 
 * Once the job is finished:
 ```
@@ -1493,8 +1618,16 @@ Submitted batch job 32661678
 [Back to Top](#top)
 <hr>
 
-### <a name="hybrid-mpi-omp"></a>Hybrid (MPI + OpenMP) Jobs
-Several HPC codes use a hybrid MPI, OpenMP approach.
+### Hybrid (MPI + OpenMP) Jobs: <a name="hybrid-mpi-omp"></a>
+<b>Subsections:</b>
+* [Hybrid (MPI + OpenMP): Source Code](#hybrid-mpi-omp-source)
+* [Hybrid (MPI + OpenMP): Compiling](#hybrid-mpi-omp-compile)
+* [Hybrid (MPI + OpenMP): Batch Script Submission](#hybrid-mpi-omp-batch-submit)
+* [Hybrid (MPI + OpenMP): Batch Script Output](#hybrid-mpi-omp-batch-output)
+
+
+### Hybrid (MPI + OpenMP) Source Code: <a name="hybrid-mpi-omp-source"></a>
+#Several HPC codes use a hybrid MPI, OpenMP approach.
 * `ibrun` wrapper developed to handle such hybrid use cases. Automatically senses the MPI build (mvapich2, openmpi) and binds tasks correctly.
 * `ibrun -help` gives detailed usage info.
 * hello_hybrid.c is a sample code, and hello_hybrid.cmd shows “ibrun” usage.
@@ -1543,7 +1676,7 @@ int main(int argc, char *argv[]) {
 [Back to Top](#top)
 <hr>
 
-#### <a name="hybrid-mpi-omp-compile"></a>Hybrid (MPI + OpenMP): Compiling
+#### Hybrid (MPI + OpenMP): Compiling:  <a name="hybrid-mpi-omp-compile"></a>
 * To compile the hybrid MPI + OpenMPI code, we need to refer to the table of compilers listed above (and listed in the user guide).
 * We will use the command `mpicx -openmp`
 ```
@@ -1563,7 +1696,7 @@ drwxr-xr-x 16 username use300     16 Aug  5 19:02 ..
 <hr>
 
 
-#### <a name="hybrid-mpi-omp-submit"></a>Hybrid (MPI + OpenMP): Batch Script Submission
+#### Hybrid (MPI + OpenMP): Batch Script Submission:  <a name="hybrid-mpi-omp-batch-submit"></a>
 * To submit the hybrid code, we still use the `ibrun` command.
 * In this example, we set the number of threads explicitly.
 ```
@@ -1576,6 +1709,13 @@ drwxr-xr-x 16 username use300     16 Aug  5 19:02 ..
 #SBATCH --ntasks-per-node=24
 #SBATCH --export=ALL
 #SBATCH -t 01:30:00
+
+
+# Define the user environment
+source /etc/profile.d/modules.sh
+module purge
+module load intel
+module load mvapich2_ib
 
 #This job runs with 2 nodes, 24 cores per node for a total of 48 cores.
 # We use 8 MPI tasks and 6 OpenMP threads per MPI task
@@ -1598,7 +1738,8 @@ Submitted batch job 18347079
 <hr>
 
 
-#### <a name="hybrid-mpi-omp-output"></a>Hybrid (MPI + OpenMP): Batch Script Output
+#### Hybrid (MPI + OpenMP): Batch Script Output: <a name="hybrid-mpi-omp-batch-output"></a>
+
 ```
 [mthomas@comet-ln2 HYBRID]$ ll
 total 122
