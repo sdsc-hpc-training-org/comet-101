@@ -1709,9 +1709,10 @@ drwxr-xr-x 16 username use300     16 Aug  5 19:02 ..
 #SBATCH --ntasks-per-node=24
 #SBATCH --export=ALL
 #SBATCH -t 01:30:00
-
+```
 
 # Define the user environment
+```
 source /etc/profile.d/modules.sh
 module purge
 module load intel
@@ -1723,7 +1724,7 @@ module load mvapich2_ib
 export OMP_NUM_THREADS=6
 ibrun --npernode 4 ./hello_hybrid
 ```
-* Submit the job to the Slurm queue, and check the job status
+# Submit the job to the Slurm queue, and check the job status
 ```
 [mthomas@comet-ln2 HYBRID]$ sbatch hybrid-slurm.sb
 Submitted batch job 18347079
