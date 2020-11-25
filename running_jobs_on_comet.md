@@ -292,6 +292,7 @@ globus/6.0                         spark/1.5.2(default)
 ### <a name="load-and-check-module-env"></a>Load and Check Modules and Environment
 
 * Load modules:
+
 ```
 [mthomas@comet-ln3:~] module list
 Currently Loaded Modulefiles:
@@ -691,6 +692,7 @@ drwxr-xr-x 4 mthomas use300  11 Apr 16 01:57 ..
  }
 ```
 * Compile using the `nvcc`</b> command:
+
 ```
 [mthomas@comet-ln3:~/comet101/CUDA/cuda_hello]  nvcc -o hello_cuda hello_cuda.cu
 [mthomas@comet-ln3:~/comet101/CUDA/cuda_hello]  ll hello_cuda
@@ -899,6 +901,7 @@ module load cuda
 
 <b>Submit the job </b>
 * To run the job, type the batch script submission command:
+
 ```
 [mthomas@comet-ln3:~/comet101/CUDA/gpu_enum] sbatch hello_cuda.sb
 Submitted batch job 32663364
@@ -906,6 +909,7 @@ Submitted batch job 32663364
 ```
 <b>Monitor the job </b>
 * You can monitor the job until it is finished using the `sqeue` command:
+
 ```
 [mthomas@comet-ln3:~/comet101/CUDA/gpu_enum] squeue -u mthomas
              JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
@@ -1299,6 +1303,7 @@ To submit jobs to the Slurm queuing system, you need to create a slurm batch job
 submit it to the queuing system.
 
 * Change directories to the IBRUN directory using the `hellompi-slurm.sb` batch script:
+
 ```
 [mthomas@comet-ln3 MPI]$ cd IBRUN/
 [mthomas@comet-ln3 IBRUN]$ cat hellompi-slurm.sb
@@ -1340,6 +1345,7 @@ sbatch --res=SI2018DAY1 hellompi-slurm.sb
 #### Hello World (MPI): Batch Script Output: <a name="hello-world-mpi-batch-output"></a>
 
 * Check job status using the `squeue` command.
+
 ```
 [mthomas@comet-ln3 IBRUN]$ sbatch hellompi-slurm.sb; squeue -u username
 Submitted batch job 18345138
@@ -1368,6 +1374,7 @@ drwxr-xr-x 4 mthomas use300    7 Apr 16 01:11 ..
 ```
 
 * To see the contents of the output file, use the `cat` command:
+
 ```
 [mthomas@comet-ln3 IBRUN]$ cat hellompi.32662205.comet-20-03.out
 IBRUN: Command is ../hello_mpi
@@ -1454,6 +1461,7 @@ IBRUN: Job ended with value 0
 #### Hello World (OpenMP): Source Code <a name="hello-world-omp-source"></a>
 
 Change to the OPENMP examples directory:
+
 ```
 [mthomas@comet-ln3 comet101]$ cd OPENMP/
 [mthomas@comet-ln3 OPENMP]$ ls -al
@@ -1487,6 +1495,7 @@ drwxr-xr-x 16 username use300     16 Aug  5 19:02 ..
 Note that there is already a compiled version of the `hello_openmp.f90` code. You can save or delete this version.
 
 * In this example, we compile the source code using the `ifort` command, and verify that it was created:
+
 ```
 [mthomas@comet-ln3 OPENMP]$ ifort -o hello_openmp -qopenmp hello_openmp.f90
 [mthomas@comet-ln3 OPENMP]$ ls -al
@@ -1644,6 +1653,7 @@ drwxr-xr-x 16 username use300     16 Aug  5 19:02 ..
 -rw-r--r--  1 username use300    390 Aug  5 19:02 hybrid-slurm.sb
 ```
 * Look at the contents of the `hello_hybrid.c` file
+
 ```
 [mthomas@comet-ln2 HYBRID]$ cat hello_hybrid.c
 #include <stdio.h>
@@ -1679,6 +1689,7 @@ int main(int argc, char *argv[]) {
 #### Hybrid (MPI + OpenMP): Compiling:  <a name="hybrid-mpi-omp-compile"></a>
 * To compile the hybrid MPI + OpenMPI code, we need to refer to the table of compilers listed above (and listed in the user guide).
 * We will use the command `mpicx -openmp`
+
 ```
 [mthomas@comet-ln2 HYBRID]$ mpicc -openmp -o hello_hybrid hello_hybrid.c
 [mthomas@comet-ln2 HYBRID]$ ll
