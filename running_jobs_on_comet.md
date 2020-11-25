@@ -709,6 +709,7 @@ drwxr-xr-x 4 mthomas use300  11 Apr 16 01:57 ..
 
 * GPU jobs can be run via the slurm scheduler, or on interactive nodes.
 * The slurm scheduler batch script is shown below:
+
 ```
 [mthomas@comet-ln3:~/comet101/CUDA/cuda_hello]  cat hello_cuda.sb
 #!/bin/bash
