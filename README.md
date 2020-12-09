@@ -1,4 +1,4 @@
-# Comet 101 Tutorial TESTING
+# Comet 101 Tutorial
 
 ## NOTES:
 
