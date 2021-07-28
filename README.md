@@ -1,6 +1,6 @@
 ---
 sort: 3
-___
+---
 
 # Comet 101 Tutorial
 
